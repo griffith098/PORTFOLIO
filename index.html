@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dhruv|Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0a0a0a;
+            color: #f1f1f1;
+            scroll-behavior: smooth;
+        }
+        
+        /* 3D Grid Background */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.5;
+        }
+        
+        /* Glowing Effects */
+        .glow {
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+        }
+        
+        .glow-box {
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+        
+        .glow-input {
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+        
+        .glow-input:focus {
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+        }
+        
+        /* 3D Card */
+        .card-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+        
+        .card-3d:hover {
+            transform: rotateY(10deg) rotateX(5deg) translateY(-10px);
+        }
+        
+        /* Scroll Down Arrow */
+        .scroll-down {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0) translateX(-50%);
+            }
+            40% {
+                transform: translateY(-20px) translateX(-50%);
+            }
+            60% {
+                transform: translateY(-10px) translateX(-50%);
+            }
+        }
+        
+        /* Skill Orbit */
+        .skill-orbit {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+        }
+        
+        .skill-item {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-style: preserve-3d;
+            animation: orbit 20s linear infinite;
+        }
+        
+        @keyframes orbit {
+            0% {
+                transform: rotate(0deg) translateX(150px) rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg) translateX(150px) rotate(-360deg);
+            }
+        }
+        
+        /* Project Carousel */
+        .project-carousel {
+            perspective: 1000px;
+        }
+        
+        .project-card {
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+        
+        .project-card:hover {
+            transform: rotateY(15deg) scale(1.05);
+        }
+        
+        /* Certificate Gallery */
+        .certificate-gallery {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .certificate-item {
+            flex: none;
+            scroll-snap-align: start;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+        
+        .certificate-item:hover {
+            transform: rotateY(10deg) scale(1.03);
+        }
+        
+        /* Section Titles */
+        .section-title {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            bottom: -5px;
+            left: 0;
+            background: linear-gradient(90deg, rgba(0,255,255,1) 0%, rgba(0,0,0,0) 80%);
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .skill-orbit {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .skill-item {
+                width: 50px;
+                height: 50px;
+                animation: orbit-mobile 20s linear infinite;
+            }
+            
+            @keyframes orbit-mobile {
+                0% {
+                    transform: rotate(0deg) translateX(100px) rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg) translateX(100px) rotate(-360deg);
+                }
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 3D Grid Background -->
+    <div id="canvas-container"></div>
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-black bg-opacity-80 backdrop-filter backdrop-blur-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="text-2xl font-bold glow">
+                    <span class="text-cyan-400">PORTFOLIO</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#home" class="text-gray-300 hover:text-cyan-400 transition">Home</a>
+                    <a href="#about" class="text-gray-300 hover:text-cyan-400 transition">About</a>
+                    <a href="#skills" class="text-gray-300 hover:text-cyan-400 transition">Skills</a>
+                    <a href="#projects" class="text-gray-300 hover:text-cyan-400 transition">Projects</a>
+                    <a href="#certificates" class="text-gray-300 hover:text-cyan-400 transition">Certificates</a>
+                    <a href="#contact" class="text-gray-300 hover:text-cyan-400 transition">Contact</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="menu-toggle" class="text-gray-300 focus:outline-none">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4">
+                <a href="#home" class="block py-2 text-gray-300 hover:text-cyan-400 transition">Home</a>
+                <a href="#about" class="block py-2 text-gray-300 hover:text-cyan-400 transition">About</a>
+                <a href="#skills" class="block py-2 text-gray-300 hover:text-cyan-400 transition">Skills</a>
+                <a href="#projects" class="block py-2 text-gray-300 hover:text-cyan-400 transition">Projects</a>
+                <a href="#certificates" class="block py-2 text-gray-300 hover:text-cyan-400 transition">Certificates</a>
+                <a href="#contact" class="block py-2 text-gray-300 hover:text-cyan-400 transition">Contact</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div class="container mx-auto px-6 text-center">
+            <div class="max-w-4xl mx-auto">
+                <div class="mb-8">
+                    <!-- Placeholder for AI-generated photo -->
+                    <div class="w-40 h-40 mx-auto rounded-full overflow-hidden mb-6 border-4 border-cyan-400 shadow-lg">
+                        <img src="DOC/dog.jpg" class="w-full h-full object-cover" />
+                    </div>
+                </div>
+                <h1 class="text-5xl md:text-6xl font-bold mb-4 glow">Dhruv Kumar Pandey</h1>
+                <h2 class="text-xl md:text-2xl text-gray-300 mb-8">B.Tech CSE | Java Developer | Tech Enthusiast</h2>
+                <p class="text-lg text-gray-400 mb-12 max-w-2xl mx-auto">
+                    Crafting digital experiences through code and creativity. Passionate about building innovative solutions.
+                </p>
+                <a href="#about" class="inline-block px-8 py-3 bg-cyan-600 hover:bg-cyan-700 rounded-full font-medium transition transform hover:scale-105 glow-box">
+                    Explore My Journey
+                </a>
+                <!-- Resume Button Section -->
+                <a href="DOC/Dhruv.CV.docx (3).pdf" target="_blank" class="inline-block px-8 py-3 bg-gray-900 hover:bg-cyan-700 rounded-full font-medium transition transform hover:scale-105 glow-box ml-4">
+                    <i class="fas fa-file-alt mr-2"></i>View Resume
+                </a>
+            </div>
+            <div class="scroll-down">
+                <a href="#about" class="text-gray-400 hover:text-cyan-400 transition">
+                    <i class="fas fa-chevron-down text-2xl"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-black bg-opacity-70">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold mb-16 text-center section-title">
+                About <span class="text-cyan-400">Me</span>
+            </h2>
+            
+            <div class="flex flex-col lg:flex-row items-center justify-center gap-12">
+                <div class="lg:w-1/2">
+                    <div class="card-3d bg-gray-900 bg-opacity-80 rounded-xl p-8 border border-gray-800 glow-box">
+                        <h3 class="text-2xl font-bold mb-4 text-cyan-400">Who Am I?</h3>
+                        <p class="text-gray-300 mb-6">
+                            I'm Dhruv Kumar Pandey, currently in my 3rd year of B.Tech at Galgotias University, passionate about development, design, and system architecture.
+                        </p>
+                        <p class="text-gray-300 mb-6">
+                            With a strong foundation in computer science and hands-on experience in various programming languages and technologies, I enjoy solving complex problems and building efficient solutions.
+                        </p>
+                        <div class="flex flex-wrap gap-4">
+                            <div class="flex items-center bg-gray-800 px-4 py-2 rounded-full">
+                                <i class="fab fa-java text-red-500 mr-2"></i>
+                                <span class="text-gray-300">Java</span>
+                            </div>
+                            <div class="flex items-center bg-gray-800 px-4 py-2 rounded-full">
+                                <i class="fab fa-python text-blue-400 mr-2"></i>
+                                <span class="text-gray-300">Python</span>
+                            </div>
+                            <div class="flex items-center bg-gray-800 px-4 py-2 rounded-full">
+                                <i class="fas fa-code text-yellow-400 mr-2"></i>
+                                <span class="text-gray-300">DSA</span>
+                            </div>
+                            <div class="flex items-center bg-gray-800 px-4 py-2 rounded-full">
+                                <i class="fas fa-database text-green-400 mr-2"></i>
+                                <span class="text-gray-300">DBMS</span>
+                            </div>
+                            <div class="flex items-center bg-gray-800 px-4 py-2 rounded-full">
+                                <i class="fas fa-server text-purple-400 mr-2"></i>
+                                <span class="text-gray-300">System Design</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="lg:w-1/2">
+                    <div class="card-3d bg-gray-900 bg-opacity-80 rounded-xl p-8 border border-gray-800 glow-box">
+                        <h3 class="text-2xl font-bold mb-4 text-cyan-400">Education</h3>
+                        <div class="mb-6">
+                            <h4 class="text-xl font-semibold text-gray-200">Galgotias University</h4>
+                            <p class="text-gray-400">Bachelor of Technology in Computer Science</p>
+                            <p class="text-gray-400">2023-2027</p>
+                            <p class="text-cyan-400 font-bold">CGPA: 8.25/10</p> <!-- CGPA line added -->
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 text-cyan-400">Relevant Coursework</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-cyan-400 mr-2"></i>
+                                <span class="text-gray-300">Data Structures & Algorithms</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-cyan-400 mr-2"></i>
+                                <span class="text-gray-300">Design & Analysis of Algorithms</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-cyan-400 mr-2"></i>
+                                <span class="text-gray-300">Operating Systems</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-cyan-400 mr-2"></i>
+                                <span class="text-gray-300">Database Management Systems</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-cyan-400 mr-2"></i>
+                                <span class="text-gray-300">Computer Organization</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check text-cyan-400 mr-2"></i>
+                                <span class="text-gray-300">Software Engineering</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Skills Section -->
+    <section id="skills" class="py-20 bg-black bg-opacity-70">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold mb-16 text-center section-title">
+                My <span class="text-cyan-400">Skills</span>
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div>
+                    <h3 class="text-2xl font-bold mb-6 text-cyan-400">Technical Skills</h3>
+                    
+                    <div class="mb-8">
+                        <h4 class="text-xl font-semibold text-gray-200 mb-4">Programming Languages</h4>
+                        <div class="flex flex-wrap gap-3">
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fab fa-java text-red-500 mr-2"></i>
+                                <span>Java</span>
+                            </div>
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fab fa-python text-blue-400 mr-2"></i>
+                                <span>Python</span>
+                            </div>
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fas fa-code text-yellow-400 mr-2"></i>
+                                <span>C</span>
+                            </div>
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fas fa-code text-purple-400 mr-2"></i>
+                                <span>C++</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <h4 class="text-xl font-semibold text-gray-200 mb-4">Web Technologies</h4>
+                        <div class="flex flex-wrap gap-3">
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fab fa-html5 text-orange-500 mr-2"></i>
+                                <span>HTML5</span>
+                            </div>
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fab fa-css3-alt text-blue-500 mr-2"></i>
+                                <span>CSS3</span>
+                            </div>
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fab fa-js text-yellow-300 mr-2"></i>
+                                <span>JavaScript</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <h4 class="text-xl font-semibold text-gray-200 mb-4">Database</h4>
+                        <div class="flex flex-wrap gap-3">
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fas fa-database text-blue-300 mr-2"></i>
+                                <span>MySQL</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-bold mb-6 text-cyan-400">Tools & Libraries</h3>
+                    
+                    <div class="mb-8">
+                        <h4 class="text-xl font-semibold text-gray-200 mb-4">Development Tools</h4>
+                        <div class="flex flex-wrap gap-3">
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fas fa-code text-blue-500 mr-2"></i>
+                                <span>VS Code</span>
+                            </div>
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fas fa-code text-purple-500 mr-2"></i>
+                                <span>Eclipse</span>
+                            </div>
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fas fa-code text-red-400 mr-2"></i>
+                                <span>IntelliJ</span>
+                            </div>
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fas fa-chart-line text-green-400 mr-2"></i>
+                                <span>PowerBI</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <h4 class="text-xl font-semibold text-gray-200 mb-4">Python Libraries</h4>
+                        <div class="flex flex-wrap gap-3">
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fas fa-table text-blue-400 mr-2"></i>
+                                <span>Pandas</span>
+                            </div>
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fas fa-calculator text-yellow-400 mr-2"></i>
+                                <span>NumPy</span>
+                            </div>
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fas fa-chart-bar text-orange-400 mr-2"></i>
+                                <span>Matplotlib</span>
+                            </div>
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fas fa-chart-pie text-red-400 mr-2"></i>
+                                <span>Seaborn</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <h4 class="text-xl font-semibold text-gray-200 mb-4">Soft Skills</h4>
+                        <div class="flex flex-wrap gap-3">
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fas fa-comments text-green-400 mr-2"></i>
+                                <span>Communication</span>
+                            </div>
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fas fa-brain text-purple-400 mr-2"></i>
+                                <span>Problem Solving</span>
+                            </div>
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fas fa-lightbulb text-yellow-400 mr-2"></i>
+                                <span>Critical Thinking</span>
+                            </div>
+                            <div class="skill-badge bg-gray-800 px-4 py-2 rounded-full flex items-center">
+                                <i class="fas fa-users text-blue-400 mr-2"></i>
+                                <span>Teamwork</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Skill Orbit Visualization -->
+            <div class="mt-16">
+                <div class="skill-orbit">
+                    <div class="skill-item" style="animation-delay: 0s">
+                        <div class="w-full h-full bg-gray-800 rounded-full flex items-center justify-center border border-cyan-400">
+                            <i class="fab fa-java text-red-500 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="skill-item" style="animation-delay: -2s">
+                        <div class="w-full h-full bg-gray-800 rounded-full flex items-center justify-center border border-cyan-400">
+                            <i class="fab fa-python text-blue-400 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="skill-item" style="animation-delay: -4s">
+                        <div class="w-full h-full bg-gray-800 rounded-full flex items-center justify-center border border-cyan-400">
+                            <i class="fas fa-code text-yellow-400 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="skill-item" style="animation-delay: -6s">
+                        <div class="w-full h-full bg-gray-800 rounded-full flex items-center justify-center border border-cyan-400">
+                            <i class="fab fa-html5 text-orange-500 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="skill-item" style="animation-delay: -8s">
+                        <div class="w-full h-full bg-gray-800 rounded-full flex items-center justify-center border border-cyan-400">
+                            <i class="fab fa-js text-yellow-300 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="skill-item" style="animation-delay: -10s">
+                        <div class="w-full h-full bg-gray-800 rounded-full flex items-center justify-center border border-cyan-400">
+                            <i class="fas fa-database text-blue-300 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="skill-item" style="animation-delay: -12s">
+                        <div class="w-full h-full bg-gray-800 rounded-full flex items-center justify-center border border-cyan-400">
+                            <i class="fas fa-chart-line text-green-400 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="skill-item" style="animation-delay: -14s">
+                        <div class="w-full h-full bg-gray-800 rounded-full flex items-center justify-center border border-cyan-400">
+                            <i class="fas fa-brain text-purple-400 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Projects Section -->
+    <section id="projects" class="py-20 bg-black bg-opacity-70">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold mb-16 text-center section-title">
+                My <span class="text-cyan-400">Projects</span>
+            </h2>
+            
+            <div class="project-carousel">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Project 1 -->
+                    <div class="project-card bg-gray-900 bg-opacity-80 rounded-xl overflow-hidden border border-gray-800 glow-box">
+                        <div class="h-48 bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center">
+                            <i class="fas fa-university text-white text-6xl"></i>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2 text-cyan-400">Banking System</h3>
+                            <p class="text-gray-300 mb-4">A Java-based banking application with core banking functionalities.</p>
+                            <div class="mb-4">
+                                <h4 class="text-sm font-semibold text-gray-400 mb-2">Features:</h4>
+                                <ul class="text-gray-300 text-sm space-y-1">
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-cyan-400 mr-2"></i>
+                                        Account creation and management
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-cyan-400 mr-2"></i>
+                                        Funds transfer between accounts
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-cyan-400 mr-2"></i>
+                                        Transaction history
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-cyan-400 mr-2"></i>
+                                        Secure authentication
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="text-xs bg-gray-800 px-3 py-1 rounded-full">Java</span>
+                                <span class="text-xs bg-gray-800 px-3 py-1 rounded-full">OOP</span>
+                                <span class="text-xs bg-gray-800 px-3 py-1 rounded-full">MySQL</span>
+                                <!-- GitHub Button -->
+                                <a href="https://github.com/griffith098/Banking.git" target="_blank" rel="noopener" class="inline-flex items-center px-3 py-1 bg-gray-900 hover:bg-cyan-600 text-xs rounded-full text-cyan-400 border border-cyan-400 transition ml-2">
+                                    <i class="fab fa-github mr-1"></i> GitHub
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Project 2 (Placeholder) -->
+                    <div class="project-card bg-gray-900 bg-opacity-80 rounded-xl overflow-hidden border border-gray-800 glow-box">
+                        <div class="h-48 bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
+                            <i class="fas fa-laptop-code text-white text-6xl"></i>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2 text-cyan-400">Coming Soon</h3>
+                            <p class="text-gray-300 mb-4">Exciting new project under development. Stay tuned!</p>
+                            <div class="mb-4">
+                                <h4 class="text-sm font-semibold text-gray-400 mb-2">Technologies:</h4>
+                                <p class="text-gray-300 text-sm">To be announced</p>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="text-xs bg-gray-800 px-3 py-1 rounded-full">Coming Soon</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Project 3 (Placeholder) -->
+                    <div class="project-card bg-gray-900 bg-opacity-80 rounded-xl overflow-hidden border border-gray-800 glow-box">
+                        <div class="h-48 bg-gradient-to-r from-green-500 to-teal-600 flex items-center justify-center">
+                            <i class="fas fa-chart-line text-white text-6xl"></i>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2 text-cyan-400">Coming Soon</h3>
+                            <p class="text-gray-300 mb-4">Another exciting project in the pipeline.</p>
+                            <div class="mb-4">
+                                <h4 class="text-sm font-semibold text-gray-400 mb-2">Technologies:</h4>
+                                <p class="text-gray-300 text-sm">To be announced</p>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="text-xs bg-gray-800 px-3 py-1 rounded-full">Coming Soon</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Certificates Section -->
+    <section id="certificates" class="py-20 bg-black bg-opacity-70">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold mb-16 text-center section-title">
+                My <span class="text-cyan-400">Certificates</span>
+            </h2>
+            
+            <div class="certificate-gallery pb-8">
+                <!-- Certificate 1 -->
+                <div class="certificate-item w-64 h-80 mx-4 bg-gray-900 bg-opacity-80 rounded-xl overflow-hidden border border-gray-800 glow-box">
+                    <div class="h-40 bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center">
+                        <i class="fas fa-certificate text-white text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold mb-2 text-cyan-400">DS using Java</h3>
+                        <p class="text-gray-300 text-sm mb-3">Certified in Data Structures and Algorithms using Java from GUVI</p>
+                        <!-- <div class="text-xs text-gray-400 mb-3">Issued: June 2023</div> -->
+                        <button class="text-xs bg-cyan-600 hover:bg-cyan-700 px-3 py-1 rounded-full transition">
+                            <a href="https://www.guvi.in/share-certificate/17253j6niq95AZ2Ra4" target="_blank" rel="noopener noreferrer" class="text-white">
+                                View Certificate
+                            </a>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Certificate 2 -->
+                <div class="certificate-item w-64 h-80 mx-4 bg-gray-900 bg-opacity-80 rounded-xl overflow-hidden border border-gray-800 glow-box">
+                    <div class="h-40 bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
+                        <i class="fas fa-certificate text-white text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold mb-2 text-cyan-400"> MySQL</h3>
+                        <p class="text-gray-300 text-sm mb-3">Completed MySQL certification course from GUVI</p>
+                        <!-- <div class="text-xs text-gray-400 mb-3">Issued: March 2023</div> -->
+                        <button class="text-xs bg-cyan-600 hover:bg-cyan-700 px-3 py-1 rounded-full transition">
+                            <a href="https://www.guvi.in/share-certificate/R43CdiE609670O7m13" target="_blank" rel="noopener noreferrer" class="text-white">
+                                View Certificate
+                            </a>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Certificate 3 -->
+                <div class="certificate-item w-64 h-80 mx-4 bg-gray-900 bg-opacity-80 rounded-xl overflow-hidden border border-gray-800 glow-box">
+                    <div class="h-40 bg-gradient-to-r from-green-500 to-teal-600 flex items-center justify-center">
+                        <i class="fas fa-certificate text-white text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold mb-2 text-cyan-400"> 100 Days of Python Expert</h3>
+                        <p class="text-gray-300 text-sm mb-3">100 Days of Python-Expert certification from GUVI</p>
+                        <!-- <div class="text-xs text-gray-400 mb-3">Issued: January 2023</div> -->
+                        <button class="text-xs bg-cyan-600 hover:bg-cyan-700 px-3 py-1 rounded-full transition">
+                            <a href="https://www.guvi.in/share-certificate/mk161z26F273H74V17" target="_blank" rel="noopener noreferrer" class="text-white">
+                                View Certificate
+                            </a>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Certificate 4 -->
+                <div class="certificate-item w-64 h-80 mx-4 bg-gray-900 bg-opacity-80 rounded-xl overflow-hidden border border-gray-800 glow-box">
+                    <div class="h-40 bg-gradient-to-r from-yellow-500 to-orange-600 flex items-center justify-center">
+                        <i class="fas fa-certificate text-white text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold mb-2 text-cyan-400">NPTEL</h3>
+                        <p class="text-gray-300 text-sm mb-3">Design Thinking - A Primer</p>
+                        <!-- <div class="text-xs text-gray-400 mb-3">Issued: November 2022</div> -->
+                        <button class="text-xs bg-cyan-600 hover:bg-cyan-700 px-3 py-1 rounded-full transition">
+                            <a href="https://drive.google.com/file/d/1PxENNkCsgGUmTUw0Si6dXG2kG9kPUb0i/view" target="_blank" rel="noopener noreferrer" class="text-white">
+                                View Certificate
+                            </a>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Certificate 5 -->
+                <div class="certificate-item w-64 h-80 mx-4 bg-gray-900 bg-opacity-80 rounded-xl overflow-hidden border border-gray-800 glow-box">
+                    <div class="h-40 bg-gradient-to-r from-red-500 to-pink-600 flex items-center justify-center">
+                        <i class="fas fa-certificate text-white text-6xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold mb-2 text-cyan-400">Database Management</h3>
+                        <p class="text-gray-300 text-sm mb-3">SQL and Database Design Certification</p>
+                        <!-- <div class="text-xs text-gray-400 mb-3">Issued: September 2022</div> -->
+                        <button class="text-xs bg-cyan-600 hover:bg-cyan-700 px-3 py-1 rounded-full transition">
+                            <a href="https://www.guvi.in/share-certificate/99W7b03v09t913P3U7" target="_blank" rel="noopener noreferrer" class="text-white">
+                                View Certificate
+                            </a>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-black bg-opacity-70">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold mb-16 text-center section-title">
+                Get In <span class="text-cyan-400">Touch</span>
+            </h2>
+            
+            <div class="flex flex-col lg:flex-row gap-12">
+                <div class="lg:w-1/2">
+                    <div class="card-3d bg-gray-900 bg-opacity-80 rounded-xl p-8 border border-gray-800 glow-box">
+                        <h3 class="text-2xl font-bold mb-6 text-cyan-400">Contact Form</h3>
+                        <form id="contact-form" class="space-y-6">
+                            <div>
+                                <label for="name" class="block text-gray-300 mb-2">Your Name</label>
+                                <input type="text" id="name" name="name" class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-cyan-400 glow-input transition" required>
+                            </div>
+                            <div>
+                                <label for="email" class="block text-gray-300 mb-2">Email Address</label>
+                                <input type="email" id="email" name="email" class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-cyan-400 glow-input transition" required>
+                            </div>
+                            <div>
+                                <label for="message" class="block text-gray-300 mb-2">Your Message</label>
+                                <textarea id="message" name="message" rows="5" class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-cyan-400 glow-input transition" required></textarea>
+                            </div>
+                            <button type="submit" class="w-full px-6 py-3 bg-cyan-600 hover:bg-cyan-700 rounded-lg font-medium transition transform hover:scale-105 glow-box">
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="lg:w-1/2">
+                    <div class="card-3d bg-gray-900 bg-opacity-80 rounded-xl p-8 border border-gray-800 glow-box">
+                        <h3 class="text-2xl font-bold mb-6 text-cyan-400">Contact Info</h3>
+                        <div class="space-y-6">
+                            <div class="flex items-start">
+                                <div class="bg-cyan-600 bg-opacity-20 p-3 rounded-full mr-4">
+                                    <i class="fas fa-envelope text-cyan-400 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-200">Email</h4>
+                                    <p class="text-gray-400">dhruvpandeyss34@gmil.com</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="bg-cyan-600 bg-opacity-20 p-3 rounded-full mr-4">
+                                    <i class="fas fa-map-marker-alt text-cyan-400 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-200">Location</h4>
+                                    <p class="text-gray-400">Greater Noida, Uttar Pradesh, India</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="bg-cyan-600 bg-opacity-20 p-3 rounded-full mr-4">
+                                    <i class="fas fa-university text-cyan-400 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-gray-200">University</h4>
+                                    <p class="text-gray-400">Galgotias University</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-12">
+                            <h4 class="text-lg font-semibold text-gray-200 mb-4">Connect With Me</h4>
+                            <div class="flex space-x-4">
+                                <a href="https://www.linkedin.com/in/dhruv-kumar-pandey-500a1a369/" class="text-gray-400 hover:text-cyan-400 transition" target="_blank" rel="noopener">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                                <a href="https://github.com/griffith098" class="text-gray-400 hover:text-gray-200 transition" target="_blank" rel="noopener">
+                                    <i class="fab fa-github"></i>
+                                </a>
+                                <a href="https://twitter.com/your-twitter" class="text-gray-400 hover:text-blue-400 transition" target="_blank" rel="noopener">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                                <a href="https://youtube.com/your-youtube" class="text-gray-400 hover:text-red-500 transition" target="_blank" rel="noopener">
+                                    <i class="fab fa-youtube"></i>
+                                </a>
+                                <!-- Example: Add your portfolio or any other hyperlink -->
+                                <a href="https://your-website.com" class="text-gray-400 hover:text-green-400 transition" target="_blank" rel="noopener">
+                                    <i class="fas fa-globe"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="bg-black bg-opacity-90 py-8 border-t border-gray-800">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="text-gray-400 mb-4 md:mb-0">
+                    © 2025 Dhruv Kumar Pandey | Built with <span class="text-cyan-400">💻</span>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="https://www.linkedin.com/in/dhruv-kumar-pandey-500a1a369/" class="text-gray-400 hover:text-cyan-400 transition" target="_blank" rel="noopener">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="https://github.com/griffith098" class="text-gray-400 hover:text-gray-200 transition" target="_blank" rel="noopener">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="https://twitter.com/your-twitter" class="text-gray-400 hover:text-blue-400 transition" target="_blank" rel="noopener">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://youtube.com/your-youtube" class="text-gray-400 hover:text-red-500 transition" target="_blank" rel="noopener">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Mobile menu toggle
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+        
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+                
+                // Close mobile menu if open
+                document.getElementById('mobile-menu').classList.add('hidden');
+            });
+        });
+        
+        // Contact form submission
+        document.getElementById('contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+            
+            // Here you would typically send the data to a server
+            console.log('Form submitted:', { name, email, message });
+            
+            // Show success message
+            alert('Thank you for your message, ' + name + '! I will get back to you soon.');
+            
+            // Reset form
+            this.reset();
+        });
+        
+        // 3D Grid Background with Three.js
+        function initThreeJS() {
+            const container = document.getElementById('canvas-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            // Create scene
+            const scene = new THREE.Scene();
+            
+            // Create camera
+            const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            camera.position.z = 30;
+            
+            // Create renderer
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            container.appendChild(renderer.domElement);
+            
+            // Create grid geometry
+            const gridSize = 20;
+            const gridDivisions = 20;
+            const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0x00ffff, 0x555555);
+            scene.add(gridHelper);
+            
+            // Add some floating cubes
+            const cubes = [];
+            const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+            const cubeMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x00ffff,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.5
+            });
+            
+            for (let i = 0; i < 5; i++) {
+                const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                cube.position.x = (Math.random() - 0.5) * 20;
+                cube.position.y = (Math.random() - 0.5) * 20;
+                cube.position.z = (Math.random() - 0.5) * 20;
+                cube.rotation.x = Math.random() * Math.PI;
+                cube.rotation.y = Math.random() * Math.PI;
+                cubes.push({
+                    mesh: cube,
+                    speed: {
+                        x: Math.random() * 0.02 - 0.01,
+                        y: Math.random() * 0.02 - 0.01,
+                        z: Math.random() * 0.02 - 0.01
+                    }
+                });
+                scene.add(cube);
+            }
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            });
+            
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                // Rotate grid
+                gridHelper.rotation.x += 0.001;
+                gridHelper.rotation.y += 0.001;
+                
+                // Move cubes
+                cubes.forEach(cube => {
+                    cube.mesh.rotation.x += cube.speed.x;
+                    cube.mesh.rotation.y += cube.speed.y;
+                    cube.mesh.rotation.z += cube.speed.z;
+                    
+                    // Bounce within bounds
+                    if (Math.abs(cube.mesh.position.x) > 10) cube.speed.x = -cube.speed.x;
+                    if (Math.abs(cube.mesh.position.y) > 10) cube.speed.y = -cube.speed.y;
+                    if (Math.abs(cube.mesh.position.z) > 10) cube.speed.z = -cube.speed.z;
+                    
+                    cube.mesh.position.x += cube.speed.x * 2;
+                    cube.mesh.position.y += cube.speed.y * 2;
+                    cube.mesh.position.z += cube.speed.z * 2;
+                });
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+        }
+        
+        // Initialize Three.js when the page loads
+        window.addEventListener('load', initThreeJS);
+    </script>
+</body>
+</html>
